@@ -1,0 +1,5 @@
+open 192.168.1.10
+user g2021079 rqda52465
+cd test
+put tickets.info
+bye
