@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<head>
+  <title>#BKUP# TCU SC学食情報</title>
+  <meta name="viewport" content="width=device-width, initial-scale=2.0, maximum-scale=1.0, minimum-scale=1.0">
+  <link href="https://fonts.googleapis.com/css?family=Alegreya+Sans+SC:300" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@300&display=swap" rel="stylesheet">
+  <style>
+    body{
+    background: #87ceeb;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    }
+    h1 {
+    font-size: 45px;
+    text-align: center;
+    font-family: 'Alegreya Sans SC', sans-serif;
+    }
+    h2 {
+    font-size: 32px;
+    background: #20b2aa;
+    width: 210px;
+    text-align: center;
+    }
+    h3 {
+    font-size: 32px;
+    background: #d2691e;
+    width: 210px;
+    text-align: center;
+    }
+    h4 {
+    font-size: 28px;
+    }
+    p {
+    font-size: 18px;
+    padding: 5px;
+    }
+    h6 {
+    font-size: 13px;
+    text-align: center;
+    }
+    .ticket{
+    background: #00ced1;
+    <!-padding: 10px;->
+    }
+    .info{
+    background: #deb887;
+    <!-padding: 10px;->
+    }
+    @media screen and (max-width: 600px){
+    h1{
+    font-size: 40px;
+    }
+    }
+    </style>
+</head>
+<body>
+  <h1>TCU SC学食情報</h1>
+  <div class="ticket">
+  <h2>-食券状況-</h2>
+  <p>
+    {% autoescape False %}
+    {{ dummy_infomation }}
+    {% endautoescape %}
+  </p>
+  </div>
+  <div class="info">
+  <h3>-おしらせ-</h3>
+  <p>
+    {% autoescape False %}
+    {{ dummy_reccomend }}
+    {% endautoescape %}
+  </p>
+  </div>
+  </body>
+<footer>
+  <h4><small><i>SPECIAL THANKS</i></small></h4>
+  <ul>
+    <li>Raspberry Pi 4 model B+ 8GB</li>
+    <li>wiringPi
+    <li>Amazon Web Service EC2 (VPC)</li>
+    <li>flask
+  </ul>
+    <h6><u>Copyright 2021 SD-PBL(2) Q1 Group32 members</u></h6>
+  </footer>
+  
+</html>
