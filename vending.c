@@ -4,15 +4,18 @@
 #include<unistd.h>
 #include<wiringPi.h>
 
-#define BlackLeft 21
-#define Red 20
-#define Yellow 16
-#define Blue 26
-#define Green 19
-#define BlackRight 13
+#define BlackLeft 21 //set GPIO pin for Black Button of left side.
+#define Red 20 //set GPIO pin for Red Button.
+#define Yellow 16 //set GPIO pin for Yellow Button.
+#define Blue 26 //set GPIO pin for Blue Button.
+#define Green 19 //set GPIO pin for Green Button.
+#define BlackRight 13 //set GPIO pin for Black Button of right side.
+#define LED 14 //set GPIO pin for status LED.
 
 typedef struct {
-  int no, value, current_tickets, set_tickets, popular;
+  int no, value, current_tickets, prev_tickets, set_tickets, popular;
+  int tickets_move[5];
+  int* next;
   char name[256];
 } Item;
 
@@ -26,12 +29,19 @@ int main (void)
   int init_flag=0, return_value=0, n=0, count=0; //number of items .
   char buffer[1024];
   clear (buffer, 1024);
-  FILE *setting=NULL, *temp=NULL;
+  FILE *setting=NULL;
   Item *item;
-  clock_t start, stop;
   if (wiringPiSetupGpio() == 0){
     init_flag++;
   }
+  pinMode (BlackLeft, INPUT);
+  pinMode (Red, INPUT);
+  pinMode (Yellow, INPUT);
+  pinMode (Blue, INPUT);
+  pinMode (Green, INPUT);
+  pinMode (BlackRight, INPUT);
+  pinMode (LED, OUTPUT);
+  digitalWrite (LED, LOW);
   setting = fopen ("./setting.txt", "r");
   if (setting != NULL) init_flag++;
   fgets(buffer, 1024, setting); //skip 1line.
@@ -79,9 +89,10 @@ int main (void)
   }else{
     printf("failed.\n");
   }
+  digitalWrite (LED, HIGH);
   printf("===============settings===============\n");
   for (int i=0;i<n;i++){
-    printf("%d\t%d枚\t%d円\t\"%s\"\n", item[i].no, item[i].set_tickets, item[i].value, &(item[i].name));
+    printf("No.%d\t%d枚\t%d円\t\"%s\"\n", item[i].no, item[i].set_tickets, item[i].value, &(item[i].name));
   }
   printf("======================================\n");
   //==========================
@@ -89,32 +100,26 @@ int main (void)
     if (digitalRead(BlackLeft) == 1){
       item[0].current_tickets--;
       sendAWS(item,n);
-      usleep(400000);
     }
     if (digitalRead(Red) == 1){
       item[1].current_tickets--;
       sendAWS(item,n);
-      usleep(400000);
     }
     if (digitalRead(Yellow) == 1){
       item[2].current_tickets--;
       sendAWS(item,n);
-      usleep(400000);
     }
     if (digitalRead(Blue) == 1){
       item[3].current_tickets--;
       sendAWS(item,n);
-      usleep(400000);
     }
     if (digitalRead(Green) == 1){
       item[4].current_tickets--;
       sendAWS(item,n);
-      usleep(400000);
     }
     if (digitalRead(BlackRight) == 1){
       item[5].current_tickets--;
       sendAWS(item,n);
-      usleep(400000);
     }
   }
   return 1;
@@ -129,6 +134,7 @@ void clear (char *buf, int size)
 
 void sendAWS (Item *item, int n)
 {
+  digitalWrite (LED, LOW);
   time_t timer = time(NULL);
   tm = localtime(&timer);
   FILE *output = NULL;
@@ -146,4 +152,6 @@ void sendAWS (Item *item, int n)
   fprintf(output, buffer);
   fclose(output);
   system("ftp -n < ftp.txt");
+  usleep(400000);
+  digitalWrite (LED, HIGH);
 }
