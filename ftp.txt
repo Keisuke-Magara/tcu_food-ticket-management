@@ -1,5 +1,6 @@
-open 192.168.1.19
-user g2021079 rqda52465
-cd test
+passive
+open 35.73.250.185
+user ec2-user sdpbl2
+cd ftp_files
 put tickets.info
 bye

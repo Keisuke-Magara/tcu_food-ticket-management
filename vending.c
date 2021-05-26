@@ -17,6 +17,7 @@ typedef struct {
   int tickets_move[5];
   int* next;
   char name[256];
+  int ave[10], times;
 } Item;
 
 void clear (char*, int);
@@ -31,6 +32,7 @@ int main (void)
   clear (buffer, 1024);
   FILE *setting=NULL;
   Item *item;
+  clock_t start, stop;
   if (wiringPiSetupGpio() == 0){
     init_flag++;
   }
@@ -96,7 +98,13 @@ int main (void)
   }
   printf("======================================\n");
   //==========================
+  start = time();
   while (1) {
+    stop = time();
+    if (stop - start > 60){
+      get_ave(item);
+      start = time();
+    }
     if (digitalRead(BlackLeft) == 1){
       item[0].current_tickets--;
       sendAWS(item,n);
@@ -145,13 +153,17 @@ void sendAWS (Item *item, int n)
     printf("NULL!");
   }
   for (int i=0;i<n;i++){
-    fprintf(output, "%d %d %d %d %s %d\n", item[i].no, item[i].current_tickets, item[i].set_tickets, item[i].popular, &(item[i].name), item[i].value);
+    fprintf(output, "%d %d %d %d %s %d \n", item[i].no, item[i].current_tickets, item[i].set_tickets, item[i].popular, &(item[i].name), item[i].value);
   }
-  fprintf(output, "\ndate ");
-  strftime (buffer, 128, "%Y %m %d %H %M %S", tm);
+  fprintf(output, "\n最終更新: ");
+  strftime (buffer, 128, "%Y/%m/%d %H:%M:%S", tm);
   fprintf(output, buffer);
   fclose(output);
   system("ftp -n < ftp.txt");
   usleep(400000);
   digitalWrite (LED, HIGH);
 }
+
+void get_ave (Item *item)
+{
+  
