@@ -24,10 +24,11 @@ void clear (char*, int);
 void sendAWS (Item*, int);
 
 struct tm *tm=NULL;
+int n=0; //number of items.
 
 int main (void)
 {
-  int init_flag=0, return_value=0, n=0, count=0; //number of items .
+  int init_flag=0, return_value=0, count=0;
   char buffer[1024];
   clear (buffer, 1024);
   FILE *setting=NULL;
@@ -48,7 +49,7 @@ int main (void)
   if (setting != NULL) init_flag++;
   fgets(buffer, 1024, setting); //skip 1line.
   fgets(buffer,6,setting);
-  fscanf(setting, "%d", &n);
+  fscanf(setting, "%d", &n); //get number of items.
   for (int i=0;i<4;i++){
     fgets(buffer, 1024, setting); //skip 3lines.
   }
@@ -85,8 +86,12 @@ int main (void)
   fclose(setting);
   //========================
   printf("done.\n");
+  for (int i=0;i<n;i++){
+    item[i].times = 0;
+    init_flag++;
+  }
   printf("initializing ");
-  if (init_flag == 3){
+  if (init_flag == 3+n){
     printf("success.\n");
   }else{
     printf("failed.\n");
@@ -98,12 +103,14 @@ int main (void)
   }
   printf("======================================\n");
   //==========================
-  start = time();
+  start = time(NULL);
   while (1) {
-    stop = time();
+    stop = time(NULL);
     if (stop - start > 60){
+      digitalWrite(LED, LOW);
       get_ave(item);
       start = time();
+      digitalWrite(LED, HIGH);
     }
     if (digitalRead(BlackLeft) == 1){
       item[0].current_tickets--;
@@ -166,4 +173,20 @@ void sendAWS (Item *item, int n)
 
 void get_ave (Item *item)
 {
-  
+  int ct = item[0].times;
+  int dif;
+  for (int i=0;i<n;i++){
+    dif = item[i].current_tickets - item[i].prev_tickets
+      item[i].ave[ct%10] = dif;
+      item[i].popular = 0;
+      for (int j=0;j<10;j++){
+        item[i].popular += item[i].ave[j];
+      } 
+      if (ct >= 10){
+        item[i].popular /= 10;
+      }else{
+        item[i].popular /= ct+1
+      }
+    item[i].times++;
+  }
+}
