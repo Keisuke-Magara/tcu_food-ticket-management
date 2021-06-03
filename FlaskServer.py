@@ -1,11 +1,11 @@
-#codeing: utf-8
+#coding: utf-8
 from flask import Flask, render_template
 import os
 app = Flask(__name__)
 
 @app.route('/')
 def health():
-    return "Server is running.\n==Please access /FoodInfo ."
+    return "Server is running.<br>==> Please access /FoodInfo ."
 
 
 @app.route('/FoodInfo')
