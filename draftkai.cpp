@@ -15,7 +15,7 @@ struct ticket{
               int number;   //
               int nownum;   //今の食券の残り枚数
               double orinum;   //元の食券の枚数
-             int jyuppun;   //直近１０分で売れた枚数
+             double jyuppun;   //直近１０分で売れた枚数
              string menu;   //料理名
               int  price;   //値段
              int sellnum;   //売れた枚数
@@ -79,9 +79,11 @@ int main(){
 	  }
 	}
   }
+	    
 		//売上数の順位付け
 	    for(i=0;i<k;i++){
 	stars[i].sellrank=1;
+       
 	for(j=0;j<k;j++){
 	  if(stars[i].sellnum<stars[j].sellnum){
 		stars[i].sellrank++;
@@ -141,19 +143,52 @@ int main(){
 			secjyu=i;
 		  }
 		}
-		writing_file<<"直ぐに売り切れる可能性が高いもの"<<std::endl;
+		//何も売れていない場合
+		int p=0;
+  for(i=0;i<k;i++){
+    if( stars[i].sellnum!=0){
+      p=p+1;
+    }
+  }
+
+  		//10ppunがまだの場合
+		int ww=0;
+  for(i=0;i<k;i++){
+    if( stars[i].jyuppun!=0){
+     ww=ww+1;
+    }
+  }
+
+		int uu;
+		  uu=0;
+		writing_file<<"直ぐに売り切れる可能性が高いもの\n-------------------------------------------"<<std::endl;
 		for(i=0;i<k;i++){
-		  if( stars[i].jyuppun*0.5 >= stars[i].nownum){
+		  if( stars[i].jyuppun*5 >= stars[i].nownum){
 		    writing_file <<stars[i].menu<<"は5分以内に売り切れる可能性が高いです"<<std::endl;
+		    uu=1;
 		  }else
-		  if( stars[i].jyuppun >= stars[i].nownum){
+		  if( stars[i].jyuppun*10 >= stars[i].nownum){
 		    writing_file <<stars[i].menu<<"は10分以内に売り切れる可能性が高いです"<< std::endl;
-		  }else if( stars[i].jyuppun*1.5 >= stars[i].nownum){
+		    uu=1;
+		  }else if( stars[i].jyuppun*15 >= stars[i].nownum){
 		    writing_file <<stars[i].menu<<"は15分以内に売り切れる可能性が高いです"<<std::endl;
-		  }else if( stars[i].jyuppun*2 >= stars[i].nownum){
+		    uu=1;
+		  }else if( stars[i].jyuppun*20 >= stars[i].nownum){
 		    writing_file <<stars[i].menu<<"は20分以内に売り切れる可能性が高いです"<< std::endl;
+		    uu=1;
+		  }}
+
+		if(uu==0){
+		    	writing_file<<"20分以内に売り切れそうなものはありません"<<std::endl;
+			uu=1;
 		  }
-		}
+		  writing_file<<"-------------------------------------------"<<std::endl;
+
+
+		  writing_file<<"売れ行き情報\n"<<std::endl;
+		  if(p==0){
+		  	  writing_file<< "まだ何も売れていません"<<std::endl;}
+		  else{
 		if(w == 1){
 		
 		  writing_file<< "一番売れているのは" <<stars[topsell].menu<<"です"<<std::endl;}
@@ -162,12 +197,17 @@ int main(){
 		  
 	if(h == 1){
 			  
-	  writing_file<< "1番目に売れきれるのが早いのは" <<stars[topper].menu<<"です"<<std::endl;}
+	  writing_file<< "1番売りきれるのが早いのは" <<stars[topper].menu<<"です"<<std::endl;}
 	else /* if(h==2) */ {   writing_file<< "一番売りきれるのが早いのは" <<stars[topper].menu<<"と"<<stars[topper2].menu<<"です"<<std::endl;}
+
+        	  if(ww==0){
+		  	  writing_file<< "\n"<<std::endl;}
+		  else{
+	
 
 	if(z ==1){
 	  writing_file<<"今一番勢い良く売れているのは"<<stars[topjyu].menu<<"です"<<std::endl;}
-	else /* if(z==2) */ {   writing_file<< "一番勢い良く売れているのは" <<stars[topjyu].menu<<"と"<<stars[topjyu2].menu<<"です"<<std::endl;}
+	else /* if(z==2) */ {   writing_file<< "一番勢い良く売れているのは" <<stars[topjyu].menu<<"と"<<stars[topjyu2].menu<<"です"<<std::endl;}}}
 
 
 	/*   for(int i=0; i<k ;i++){

@@ -13,7 +13,7 @@ def info():
     ticket_path = './ticket.txt'
     reccomend_path = './recommend.txt'
     os.system("python3 /home/ec2-user/vending/sdpblseiretu.py")
-    #os.system("/home/ec2-user/vending/forecast.out")
+    os.system("/home/ec2-user/vending/a.out")
     f = open (ticket_path, 'r')
     scaned1 = f.readlines()
     content1 = ''
