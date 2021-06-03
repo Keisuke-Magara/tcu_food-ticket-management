@@ -4,7 +4,7 @@
 #include<unistd.h>
 #include<wiringPi.h>
 
-#define BlackLeft 21 //set GPIO pin for Black Button of left side.printf("enterA\n");printf("enterA\n");
+#define BlackLeft 21 //set GPIO pin for Black Button of left side.
 #define Red 20 //set GPIO pin for Red Button.
 #define Yellow 16 //set GPIO pin for Yellow Button.
 #define Blue 26 //set GPIO pin for Blue Button.
