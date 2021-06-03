@@ -4,7 +4,7 @@
 #include<unistd.h>
 #include<wiringPi.h>
 
-#define BlackLeft 21 //set GPIO pin for Black Button of left side.
+#define BlackLeft 21 //set GPIO pin for Black Button of left side.printf("enterA\n");printf("enterA\n");
 #define Red 20 //set GPIO pin for Red Button.
 #define Yellow 16 //set GPIO pin for Yellow Button.
 #define Blue 26 //set GPIO pin for Blue Button.
@@ -13,22 +13,24 @@
 #define LED 14 //set GPIO pin for status LED.
 
 typedef struct {
-  int no, value, current_tickets, prev_tickets, set_tickets, popular;
+  int no, value, current_tickets, prev_tickets, set_tickets;
   int tickets_move[5];
   int* next;
   char name[256];
   int ave[10], times;
+  double popular;
 } Item;
 
 void clear (char*, int);
 void sendAWS (Item*, int);
+void get_ave(Item*);
 
 struct tm *tm=NULL;
 int n=0; //number of items.
 
 int main (void)
 {
-  int init_flag=0, return_value=0, count=0;
+  int init_flag=0, return_value=0, count=0, min=0;
   char buffer[1024];
   clear (buffer, 1024);
   FILE *setting=NULL;
@@ -81,6 +83,7 @@ int main (void)
     }
     item[count].set_tickets = atoi(buffer);
     item[count].current_tickets = item[count].set_tickets;
+    item[count].prev_tickets = item[count].set_tickets;
     count++;
   }
   fclose(setting);
@@ -88,15 +91,17 @@ int main (void)
   printf("done.\n");
   for (int i=0;i<n;i++){
     item[i].times = 0;
+    for (int j=0;j<10;j++){
+      item[i].ave[j] = 0;
+    }
     init_flag++;
   }
   printf("initializing ");
   if (init_flag == 3+n){
-    printf("success.\n");
+    printf("success!\n");
   }else{
     printf("failed.\n");
   }
-  digitalWrite (LED, HIGH);
   printf("===============settings===============\n");
   for (int i=0;i<n;i++){
     printf("No.%d\t%d枚\t%d円\t\"%s\"\n", item[i].no, item[i].set_tickets, item[i].value, &(item[i].name));
@@ -104,12 +109,19 @@ int main (void)
   printf("======================================\n");
   //==========================
   start = time(NULL);
+  sendAWS(item,n);
+  digitalWrite (LED, HIGH);
   while (1) {
     stop = time(NULL);
-    if (stop - start > 60){
+    min = stop - start;
+    if (min%10 == 0){
+      printf("min=%d\n", min);
+    }
+    if (min > 60){
       digitalWrite(LED, LOW);
       get_ave(item);
-      start = time();
+      sendAWS(item,n);
+      start = time(NULL);
       digitalWrite(LED, HIGH);
     }
     if (digitalRead(BlackLeft) == 1){
@@ -160,7 +172,7 @@ void sendAWS (Item *item, int n)
     printf("NULL!");
   }
   for (int i=0;i<n;i++){
-    fprintf(output, "%d %d %d %d %s %d \n", item[i].no, item[i].current_tickets, item[i].set_tickets, item[i].popular, &(item[i].name), item[i].value);
+    fprintf(output, "%d %d %d %.2f %s %d \n", item[i].no, item[i].current_tickets, item[i].set_tickets, item[i].popular, &(item[i].name), item[i].value);
   }
   fprintf(output, "\n最終更新: ");
   strftime (buffer, 128, "%Y/%m/%d %H:%M:%S", tm);
@@ -175,18 +187,21 @@ void get_ave (Item *item)
 {
   int ct = item[0].times;
   int dif;
+  printf("ct=%d", ct);
   for (int i=0;i<n;i++){
-    dif = item[i].current_tickets - item[i].prev_tickets
-      item[i].ave[ct%10] = dif;
-      item[i].popular = 0;
-      for (int j=0;j<10;j++){
-        item[i].popular += item[i].ave[j];
-      } 
-      if (ct >= 10){
-        item[i].popular /= 10;
-      }else{
-        item[i].popular /= ct+1
-      }
+    dif = item[i].prev_tickets - item[i].current_tickets;
+    item[i].ave[ct%10] = dif;
+    item[i].popular = 0;
+    for (int j=0;j<10;j++){
+      item[i].popular += item[i].ave[j];
+    }
+    printf("sum=%f\n", item[i].popular);
+    if (ct >= 10){
+      item[i].popular /= 10;
+    }else{
+      item[i].popular /= ct+1;
+    }
     item[i].times++;
+    item[i].prev_tickets = item[i].current_tickets;
   }
 }
